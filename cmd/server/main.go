@@ -53,7 +53,6 @@ func defineRoutes(router *gin.Engine) {
 
 	api := router.Group("/api")
 	api.Use(auth.TokenHandler())
-	// api.Use(auth.Middleware())
 
 	api.GET("/player", player.GetPlayer)
 }
