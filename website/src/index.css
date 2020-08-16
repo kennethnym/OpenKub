@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+@import url('https://unicons.iconscout.com/release/v3.0.0/css/line.css');
+
+.Toastify__toast-container {
+	border-radius: 0.25rem;
+}
+
+body {
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+input::selection {
+	background-color: white;
+	color: theme('colors.teal.500');
+}
+
+code {
+	font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+		monospace;
+}
+
+div.loader {
+	border: 2px solid transparent;
+	border-top: 4px solid theme('colors.teal.500');
+	border-radius: 50%;
+}
