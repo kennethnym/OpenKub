@@ -1,25 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import 'react-toastify/dist/ReactToastify.css';
 
-import Landing from './landing';
+import 'react-toastify/dist/ReactToastify.css';
+import 'tippy.js/dist/tippy.css';
+
 import * as serviceWorker from './serviceWorker';
 import './index.out.css';
+import App from './app';
 
-function Root() {
-	return (
-		<React.StrictMode>
-			<Router>
-				<Switch>
-					<Route path="/">
-						<Landing />
-					</Route>
-				</Switch>
-			</Router>
-		</React.StrictMode>
-	);
-}
+const root = document.getElementById('root');
 
-ReactDOM.render(<Root />, document.getElementById('root'));
+ReactDOM.render(<App />, root);
 serviceWorker.unregister();
+
+// credit to https://chrisshepherd.me/posts/adding-hot-module-reloading-to-create-react-app
+if (module.hot) {
+	module.hot.accept();
+}

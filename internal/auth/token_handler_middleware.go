@@ -43,23 +43,21 @@ func SaveTokensToCookies(ctx *gin.Context, accessToken string, refreshToken stri
 // - Refreshes tokens when access_token expires.
 func TokenHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		accessTokenCookie, err := ctx.Request.Cookie("access_token")
-
-		if err != nil {
-			fmt.Printf("err %v\n", err)
-			unauthorizedRequestError(ctx, "Access token must be present.")
-			return
-		}
-
+		accessTokenCookie, _ := ctx.Request.Cookie("access_token")
 		refreshTokenCookie, err := ctx.Request.Cookie("refresh_token")
 
 		if err != nil {
 			// idk what happened.
 			// refresh token should always be present alongside access token
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
-				"error":   errcode.UnexpectedError,
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
+				"error":   unauthorizedRequest,
 				"message": "Please re-login and try again.",
 			})
+			return
+		}
+
+		if accessTokenCookie == nil {
+			refreshToken(ctx, refreshTokenCookie)
 			return
 		}
 
@@ -98,23 +96,45 @@ func TokenHandler() gin.HandlerFunc {
 			return
 		}
 
-		// generate new tokens
+		refreshToken(ctx, refreshTokenCookie)
+	}
+}
 
-		refreshToken, err := jwt.ParseString(
-			refreshTokenCookie.Value,
-			jwt.WithVerify(jwa.HS256, []byte(os.Getenv("REFRESH_TOKEN_SECRET"))),
-			jwt.WithIssuer(issuer),
-		)
+// refreshToken generates a new pair of access token and refresh token.
+// called when the access token is missing or is no longer valid
+func refreshToken(ctx *gin.Context, refreshTokenCookie *http.Cookie) {
+	// generate new tokens
 
-		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, map[string]string{
-				"error":   unauthorizedRequest,
-				"message": "Invalid refresh token",
-			})
-			return
-		}
+	refreshToken, err := jwt.ParseString(
+		refreshTokenCookie.Value,
+		jwt.WithVerify(jwa.HS256, []byte(os.Getenv("REFRESH_TOKEN_SECRET"))),
+		jwt.WithIssuer(issuer),
+	)
 
-		err = jwt.Verify(refreshToken, jwt.WithIssuer(issuer))
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, map[string]string{
+			"error":   unauthorizedRequest,
+			"message": "Invalid refresh token",
+		})
+		return
+	}
+
+	err = jwt.Verify(refreshToken, jwt.WithIssuer(issuer))
+
+	if err != nil {
+		fmt.Printf("err %v\n", err)
+		invalidRefreshTokenError(ctx)
+		return
+	}
+
+	redisClient := ctx.MustGet(ctxval.RedisClient).(*redis.Client)
+
+	_, err = redisClient.Get(ctx, refreshToken.JwtID()).Result()
+
+	if err == redis.Nil {
+		// this refresh token is not blacklisted and can be used
+		// but before that, we need to blacklist it first to prevent it from being used again
+		userID, err := strconv.Atoi(refreshToken.Subject())
 
 		if err != nil {
 			fmt.Printf("err %v\n", err)
@@ -122,50 +142,34 @@ func TokenHandler() gin.HandlerFunc {
 			return
 		}
 
-		redisClient := ctx.MustGet(ctxval.RedisClient).(*redis.Client)
+		newAccessToken, newRefreshToken, err := generateTokens(userID)
 
-		_, err = redisClient.Get(ctx, refreshToken.JwtID()).Result()
-
-		if err == redis.Nil {
-			// this refresh token is not blacklisted and can be used
-			// but before that, we need to blacklist it first to prevent it from being used again
-			userID, err := strconv.Atoi(refreshToken.Subject())
-
-			if err != nil {
-				fmt.Printf("err %v\n", err)
-				invalidRefreshTokenError(ctx)
-				return
-			}
-
-			newAccessToken, newRefreshToken, err := generateTokens(userID)
-
-			if err != nil {
-				fmt.Printf("err %v\n", err)
-				ctx.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
-					"error":   errcode.UnexpectedError,
-					"message": "An error occurred when making new tokens.",
-				})
-				return
-			}
-
-			diff := refreshToken.Expiration().Sub(time.Now())
-			err = redisClient.Set(ctx, refreshToken.JwtID(), refreshTokenCookie.Value, diff).Err()
-
-			if err != nil {
-				fmt.Printf("err %v\n", err)
-				ctx.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
-					"error":   errcode.UnexpectedError,
-					"message": "An error occurred when making new tokens.",
-				})
-				return
-			}
-
-			SaveTokensToCookies(ctx, newAccessToken, newRefreshToken)
+		if err != nil {
+			fmt.Printf("err %v\n", err)
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
+				"error":   errcode.UnexpectedError,
+				"message": "An error occurred when making new tokens.",
+			})
+			return
 		}
 
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
-			"error":   errcode.UnexpectedError,
-			"message": "An error occurred when verifying tokens.",
-		})
+		diff := refreshToken.Expiration().Sub(time.Now())
+		err = redisClient.Set(ctx, refreshToken.JwtID(), refreshTokenCookie.Value, diff).Err()
+
+		if err != nil {
+			fmt.Printf("err %v\n", err)
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
+				"error":   errcode.UnexpectedError,
+				"message": "An error occurred when making new tokens.",
+			})
+			return
+		}
+
+		SaveTokensToCookies(ctx, newAccessToken, newRefreshToken)
 	}
+
+	ctx.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{
+		"error":   errcode.UnexpectedError,
+		"message": "An error occurred when verifying tokens.",
+	})
 }

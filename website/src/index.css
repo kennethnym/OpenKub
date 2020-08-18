@@ -13,6 +13,7 @@ body {
 	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	background-color: theme('colors.gray.100');
 }
 
 input::selection {
@@ -29,4 +30,8 @@ div.loader {
 	border: 2px solid transparent;
 	border-top: 4px solid theme('colors.teal.500');
 	border-radius: 50%;
+}
+
+li.selected {
+	border-left: 2px solid theme('colors.teal.500');
 }

@@ -15,7 +15,7 @@ import (
 // If id param is specified, then this will get details about the player with that id.
 // Otherwise, it'll return details of the current player
 func GetPlayer(ctx *gin.Context) {
-	var userID int
+	var playerID int
 
 	if givenID, hasID := ctx.Params.Get("id"); hasID {
 		id, err := strconv.Atoi(givenID)
@@ -27,13 +27,13 @@ func GetPlayer(ctx *gin.Context) {
 			return
 		}
 
-		userID = id
+		playerID = id
 	} else {
-		userID = ctx.MustGet(ctxval.UserID).(int)
+		playerID = ctx.MustGet(ctxval.UserID).(int)
 	}
 
 	db := ctx.MustGet(ctxval.DbClient).(*pg.DB)
-	player := &Player{ID: userID}
+	player := &Player{ID: playerID}
 	playerModel := db.Model(player)
 
 	hasPlayer, err := playerModel.WherePK().Exists()
@@ -64,6 +64,28 @@ func GetPlayer(ctx *gin.Context) {
 		})
 		return
 	}
+
+	// We are separating queries here because currently there's a bug
+	// in go-pg that prevents us from querying relationships in a single query
+	// issue: https://github.com/go-pg/pg/issues/1667
+
+	relationships := []Relationship{}
+
+	err = db.Model(&relationships).
+		Where("player_id = ?", playerID).
+		Relation("To").
+		Select()
+
+	if err != nil {
+		fmt.Printf("err %v\n", err)
+		ctx.JSON(http.StatusInternalServerError, map[string]string{
+			"error":   errcode.UnexpectedError,
+			"message": "An unexpected error occurred when finding the player.",
+		})
+		return
+	}
+
+	player.Relationships = relationships
 
 	ctx.JSON(http.StatusOK, player)
 }

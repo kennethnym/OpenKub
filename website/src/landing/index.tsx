@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
 import { Slide, toast, ToastContainer } from 'react-toastify';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { Button, InputBox } from '../common/components/';
 import Auth from '../common/api/auth';
+import PlayerStore from '../common/api/player/store';
+import AppStore from '../app/store';
+import { Page } from '../app/pages';
 
 function Landing() {
 	const [playerName, setPlayerName] = useState('');
 	const [password, setPassword] = useState('');
 	const [loggingIn, setLoggingIn] = useState(false);
 	const [incorrectPassword, setIncorrectPassword] = useState(false);
+	const dispatch = useDispatch();
 
 	async function login() {
 		setLoggingIn(true);
@@ -24,19 +29,15 @@ function Landing() {
 				switch (response.error.error) {
 					case Auth.ErrorCodes.INCORRECT_PASSWORD:
 						setIncorrectPassword(true);
-						toast.error('Incorrect password!', {
-							position: 'top-center',
-							transition: Slide,
-						});
+						toast.error('Incorrect password!');
 						break;
 					default:
-						toast.error('Unexpected error occurred. Please try again later', {
-							position: 'top-center',
-						});
+						toast.error('Unexpected error occurred. Please try again later');
 						break;
 				}
 			} else if (response.data) {
-				console.log('player', response.data);
+				dispatch(PlayerStore.actions.setPlayer(response.data));
+				dispatch(AppStore.actions.changePage(Page.HOME));
 			}
 		} catch (e) {
 			console.log('e', e);
@@ -50,8 +51,8 @@ function Landing() {
 	}
 
 	return (
-		<div className="flex flex-col md:flex-row items-center justify-center h-screen w-screen font-sans bg-gray-100">
-			<ToastContainer />
+		<div className="flex flex-col md:flex-row items-center justify-center h-screen w-screen">
+			<ToastContainer transition={Slide} position="top-center" />
 			<div className="flex md:flex-1 flex-col self-stretch justify-center items-center bg-teal-500 shadow-inner shadow-lg">
 				<div className="flex flex-col items-start mx-8 my-8">
 					<h1 className="text-2xl md:text-4xl lg:text-6xl text-white font-bold tracking-tight">
