@@ -30,8 +30,8 @@ func invalidRefreshTokenError(ctx *gin.Context) {
 	})
 }
 
-// SaveTokensToCookies saves access token and refresh token to http-only cookies
-func SaveTokensToCookies(ctx *gin.Context, accessToken string, refreshToken string) {
+// saveTokensToCookies saves access token and refresh token to http-only cookies
+func saveTokensToCookies(ctx *gin.Context, accessToken string, refreshToken string) {
 	ctx.SetCookie("access_token", accessToken, 60*60, "/api", "", true, true)
 	ctx.SetCookie("refresh_token", refreshToken, 60*60*24*14, "/api", "", true, true)
 }
@@ -166,7 +166,7 @@ func refreshToken(ctx *gin.Context, refreshTokenCookie *http.Cookie) {
 			return
 		}
 
-		SaveTokensToCookies(ctx, newAccessToken, newRefreshToken)
+		saveTokensToCookies(ctx, newAccessToken, newRefreshToken)
 	}
 
 	ctx.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{

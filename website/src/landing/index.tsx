@@ -14,6 +14,7 @@ function Landing() {
 	const [playerName, setPlayerName] = useState('');
 	const [password, setPassword] = useState('');
 	const [loggingIn, setLoggingIn] = useState(false);
+	const [isNewPlayer, setIsNewPlayer] = useState(false);
 	const [incorrectPassword, setIncorrectPassword] = useState(false);
 	const dispatch = useDispatch();
 	const { socket, initializeSocket } = useSocket();
@@ -48,34 +49,53 @@ function Landing() {
 	}, [dispatch, socket]);
 
 	async function login() {
-		console.log('login');
-
+		setIncorrectPassword(false);
 		setLoggingIn(true);
 
 		try {
-			const response = await Auth.loginOrRegister({ playerName, password });
+			const response = await Auth.loginOrRegister({
+				playerName,
+				password,
+				newPlayer: isNewPlayer,
+			});
 
 			console.log('response', response);
 
 			if (response.error) {
-				setLoggingIn(false);
-
-				switch (response.error.error) {
-					case Auth.ErrorCodes.INCORRECT_PASSWORD:
-						setIncorrectPassword(true);
-						toast.error('Incorrect password!');
-						break;
-					default:
-						toast.error('Unexpected error occurred. Please try again later');
-						break;
-				}
+				handleLoginError(response.error);
 			} else if (response.data) {
 				initializeSocket();
 				dispatch(PlayerStore.actions.setPlayer(response.data));
 			}
 		} catch (e) {
 			console.log('e', e);
+			toast.error('Cannot connect to server. Please try again later.');
 			setLoggingIn(false);
+		}
+	}
+
+	function handleLoginError(error: ErrorResponse) {
+		setLoggingIn(false);
+
+		switch (error.error) {
+			case Auth.ErrorCodes.INCORRECT_PASSWORD:
+				setIncorrectPassword(true);
+				toast.error('Incorrect password!');
+				break;
+			case Auth.ErrorCodes.PLAYER_NOT_REGISTERED:
+				toast.warn(
+					'Unknown player name. Click on "I\'m a new player" to create an account instead.',
+					{ autoClose: 10000 }
+				);
+				break;
+			case Auth.ErrorCodes.USERNAME_TAKEN:
+				toast.error(
+					'Username has already been taken. Try come on with another one.'
+				);
+				break;
+			default:
+				toast.error('Unexpected error occurred. Please try again later');
+				break;
 		}
 	}
 
@@ -120,6 +140,20 @@ function Landing() {
 					showError={incorrectPassword}
 					onChange={changePasswordValue}
 				/>
+				<div className="w-full lg:w-3/4 xl:w-1/3 flex flex-row self-stretch justify-between">
+					<label
+						htmlFor="new_player_checkbox"
+						className="font-bold text-gray-500"
+					>
+						I am a new player
+					</label>
+					<input
+						id="new_player_checkbox"
+						type="checkbox"
+						checked={isNewPlayer}
+						onClick={() => setIsNewPlayer(!isNewPlayer)}
+					/>
+				</div>
 				<Button
 					loading={loggingIn}
 					disabled={playerName === '' || password === '' || loggingIn}

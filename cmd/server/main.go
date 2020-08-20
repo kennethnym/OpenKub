@@ -73,6 +73,7 @@ func defineRoutes(router *gin.Engine, server *socketio.Server, ctx map[string]in
 		ctx.String(http.StatusOK, "OpenKub backend")
 	})
 
+	public.POST("/register", auth.RegisterHandler)
 	public.POST("/login", auth.LoginHandler)
 
 	api := router.Group("/api")

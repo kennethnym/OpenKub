@@ -34,7 +34,7 @@ func AuthenticateSocket(c socketio.Conn, username string, password string) {
 
 	if !exists {
 		c.Emit("unauthenticated", map[string]string{
-			"error": usernameNotRegistered,
+			"error": playerNotRegistered,
 		})
 		return
 	}
