@@ -9,6 +9,7 @@ import (
 
 	"github.com/MrCreeper1008/OpenKub/internal/ctxval"
 	"github.com/MrCreeper1008/OpenKub/internal/errcode"
+	"github.com/MrCreeper1008/OpenKub/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/lestrrat-go/jwx/jwa"
@@ -129,7 +130,7 @@ func refreshToken(ctx *gin.Context, refreshTokenCookie *http.Cookie) {
 
 	redisClient := ctx.MustGet(ctxval.RedisClient).(*redis.Client)
 
-	_, err = redisClient.Get(ctx, refreshToken.JwtID()).Result()
+	_, err = redisClient.Get(service.RedisCtx, refreshToken.JwtID()).Result()
 
 	if err == redis.Nil {
 		// this refresh token is not blacklisted and can be used
@@ -154,7 +155,7 @@ func refreshToken(ctx *gin.Context, refreshTokenCookie *http.Cookie) {
 		}
 
 		diff := refreshToken.Expiration().Sub(time.Now())
-		err = redisClient.Set(ctx, refreshToken.JwtID(), refreshTokenCookie.Value, diff).Err()
+		err = redisClient.Set(service.RedisCtx, refreshToken.JwtID(), refreshTokenCookie.Value, diff).Err()
 
 		if err != nil {
 			fmt.Printf("err %v\n", err)

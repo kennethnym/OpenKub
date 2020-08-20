@@ -1,8 +1,11 @@
 import { createReducer } from '@reduxjs/toolkit';
+import io from 'socket.io-client';
+
+import { SERVER_URL } from 'src/common/api';
 
 import { AppState } from './type';
 import { Page } from '../pages';
-import { changePage } from './actions';
+import { changePage, initializeSocketIO } from './actions';
 
 const initialState: AppState = {
 	activePage: Page.LANDING,
@@ -11,6 +14,11 @@ const initialState: AppState = {
 const reducer = createReducer(initialState, {
 	[changePage.type]: (state, action) => {
 		state.activePage = action.payload;
+	},
+	[initializeSocketIO.type]: (state) => {
+		state.socket = io(SERVER_URL, {
+			path: '/api/socket',
+		});
 	},
 });
 

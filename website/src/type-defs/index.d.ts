@@ -15,3 +15,5 @@ declare module 'react-router-transition' {
 interface Array<T> {
 	filter<U extends T>(pred: (a: T) => a is U): U[];
 }
+
+type Optional<T> = T | undefined;

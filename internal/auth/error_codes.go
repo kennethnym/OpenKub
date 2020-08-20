@@ -11,3 +11,7 @@ const invalidRefreshToken = "AUTH.INVALID_REFRESH_TOKEN"
 
 // incorrectPassword indicates that the player has used an incorrect password
 const incorrectPassword = "AUTH.INCORRECT_PASSWORD"
+
+const usernameNotRegistered = "AUTH.USERNAME_NOT_REGISTERED"
+
+const playerAlreadyOnline = "AUTH.PLAYER_ALREADY_ONLINE"

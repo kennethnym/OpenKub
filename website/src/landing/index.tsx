@@ -1,12 +1,14 @@
 import { Slide, toast, ToastContainer } from 'react-toastify';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { Button, InputBox } from '../common/components/';
-import Auth from '../common/api/auth';
-import PlayerStore from '../common/api/player/store';
-import AppStore from '../app/store';
-import { Page } from '../app/pages';
+import { Button, InputBox } from 'src/common/components/';
+import Auth from 'src/common/api/auth';
+import { useSocket } from 'src/common/api/socket';
+import { ErrorResponse } from 'src/common/api';
+import PlayerStore from 'src/common/api/player/store';
+import AppStore from 'src/app/store';
+import { Page } from 'src/app/pages';
 
 function Landing() {
 	const [playerName, setPlayerName] = useState('');
@@ -14,18 +16,50 @@ function Landing() {
 	const [loggingIn, setLoggingIn] = useState(false);
 	const [incorrectPassword, setIncorrectPassword] = useState(false);
 	const dispatch = useDispatch();
+	const { socket, initializeSocket } = useSocket();
+
+	useEffect(() => {
+		console.log('useEffect called');
+
+		if (socket) {
+			socket
+				.on('unauthenticated', (reason: ErrorResponse) => {
+					console.log('socket is not authenticated: ', reason);
+					toast.error(
+						'Cannot authenticate current game session. Please try again later'
+					);
+				})
+				.on('authenticated', () => {
+					console.log('socket successfully authenticated');
+					setLoggingIn(false);
+					dispatch(AppStore.actions.changePage(Page.HOME));
+				});
+
+			socket.on('disconnect', () => {
+				console.log('disconnect');
+			});
+
+			socket.emit('authentication', playerName, password);
+		}
+
+		return () => {
+			socket?.removeAllListeners();
+		};
+	}, [dispatch, socket]);
 
 	async function login() {
+		console.log('login');
+
 		setLoggingIn(true);
 
 		try {
 			const response = await Auth.loginOrRegister({ playerName, password });
 
-			setLoggingIn(false);
-
 			console.log('response', response);
 
 			if (response.error) {
+				setLoggingIn(false);
+
 				switch (response.error.error) {
 					case Auth.ErrorCodes.INCORRECT_PASSWORD:
 						setIncorrectPassword(true);
@@ -36,8 +70,8 @@ function Landing() {
 						break;
 				}
 			} else if (response.data) {
+				initializeSocket();
 				dispatch(PlayerStore.actions.setPlayer(response.data));
-				dispatch(AppStore.actions.changePage(Page.HOME));
 			}
 		} catch (e) {
 			console.log('e', e);

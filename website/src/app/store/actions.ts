@@ -4,4 +4,6 @@ import { Page } from '../pages';
 
 const changePage = createAction<Page>('CHANGE_PAGE');
 
-export { changePage };
+const initializeSocketIO = createAction('INITIALIZE_SOCKET_IO');
+
+export { changePage, initializeSocketIO };

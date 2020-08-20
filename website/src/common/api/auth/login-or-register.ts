@@ -1,6 +1,6 @@
 import Player from '../player/player';
 import { API_URL } from '../constants';
-import ApiResponse from '../api-response';
+import { ApiResponse } from '../api-response';
 
 async function loginOrRegister({
 	playerName,

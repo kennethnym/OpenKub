@@ -5,11 +5,15 @@ import (
 	"net/http"
 
 	"github.com/MrCreeper1008/OpenKub/internal/auth"
+	"github.com/MrCreeper1008/OpenKub/internal/config"
+	"github.com/MrCreeper1008/OpenKub/internal/ctxval"
 	"github.com/MrCreeper1008/OpenKub/internal/player"
 	"github.com/MrCreeper1008/OpenKub/internal/service"
+	"github.com/MrCreeper1008/OpenKub/internal/socket"
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
+	socketio "github.com/googollee/go-socket.io"
 	"github.com/joho/godotenv"
 )
 
@@ -25,7 +29,17 @@ func initServer() {
 	godotenv.Load()
 
 	router := gin.Default()
-	defineRoutes(router)
+
+	// initialCtx is the initial context values that both the gin router and the socket.io server require
+	initialCtx := initializeContext()
+
+	db := service.InitializePostgres()
+	socketServer := socket.Initialize(initialCtx)
+
+	defer socketServer.Close()
+	defer db.Close()
+
+	defineRoutes(router, socketServer, initialCtx)
 
 	err := router.RunTLS(":8080", "certs/dev.crt", "certs/dev.key")
 
@@ -34,17 +48,27 @@ func initServer() {
 	}
 }
 
-func defineRoutes(router *gin.Engine) {
+// initializeContext initializes context values that both the gin router and the socket.io server need
+func initializeContext() map[string]interface{} {
+	return map[string]interface{}{
+		ctxval.DbClient:    service.InitializePostgres(),
+		ctxval.RedisClient: service.InitializeRedis(),
+	}
+}
+
+func defineRoutes(router *gin.Engine, server *socketio.Server, ctx map[string]interface{}) {
 	router.Use(static.Serve("/", static.LocalFile("./website/build", true)))
 	router.Use(cors.New(cors.Config{
-		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedOrigins:   []string{config.AllowedOrigin},
 		AllowCredentials: true,
 	}))
-	router.Use(service.PostgresMiddleware())
-	router.Use(service.RedisMiddleware())
+	router.Use(service.InitialContext(ctx))
 
 	public := router.Group("/api")
 
+	// socket.io authenticates with the token given in the initial query
+	// instead of using token cookies
+	public.GET("/socket/", socket.Handler(server))
 	public.GET("/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "OpenKub backend")
 	})

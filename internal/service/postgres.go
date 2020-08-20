@@ -8,20 +8,23 @@ import (
 	"github.com/go-pg/pg/v10"
 )
 
+// InitializePostgres creates a connection to postgres database
+func InitializePostgres() *pg.DB {
+	opt, err := pg.ParseURL(os.Getenv("DATABASE_URL"))
+
+	if err != nil {
+		panic(err)
+	}
+
+	db := pg.Connect(opt)
+
+	return db
+}
+
 // PostgresMiddleware is a gin middleware that attaches a database instance
 // to the context
-func PostgresMiddleware() gin.HandlerFunc {
+func PostgresMiddleware(db *pg.DB) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		opt, err := pg.ParseURL(os.Getenv("DATABASE_URL"))
-
-		if err != nil {
-			panic(err)
-		}
-
-		db := pg.Connect(opt)
-
-		defer db.Close()
-
 		ctx.Set(ctxval.DbClient, db)
 		ctx.Next()
 	}

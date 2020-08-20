@@ -9,6 +9,14 @@
 	border-radius: 0.25rem;
 }
 
+.tippy-box[data-theme~='dropdown'] {
+	color: inherit;
+}
+
+.tippy-box[data-theme~='dropdown'] > .tippy-content {
+	padding: 0;
+}
+
 body {
 	margin: 0;
 	-webkit-font-smoothing: antialiased;

@@ -1,3 +1,5 @@
-const API_URL = 'https://localhost:8080/api';
+const SERVER_URL = 'https://localhost:8080'
 
-export { API_URL };
+const API_URL = `${SERVER_URL}/api`;
+
+export { API_URL, SERVER_URL };

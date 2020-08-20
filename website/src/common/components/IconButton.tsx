@@ -5,12 +5,24 @@ import classNames from 'classnames';
 interface IconButtonProps {
 	icon: string;
 	tooltip?: string;
+	onClick?: () => void;
 }
 
-function IconButton({ icon, tooltip }: IconButtonProps) {
+function IconButton({ icon, tooltip, onClick }: IconButtonProps) {
 	return (
 		<Tippy content={tooltip}>
-			<i className={classNames('uil', `uil-${icon}`, 'text-lg')} />
+			<i
+				className={classNames(
+					'uil',
+					`uil-${icon}`,
+					'text-lg',
+					'transition',
+					'duration-200',
+					'ease-in-out',
+					'hover:text-teal-500'
+				)}
+				onClick={onClick}
+			/>
 		</Tippy>
 	);
 }

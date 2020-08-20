@@ -8,4 +8,13 @@ const selectActivePage = createSelector<RootStore, AppState, Page>(
 	(appState) => appState.activePage
 );
 
-export { selectActivePage };
+const selectSocket = createSelector<
+	RootStore,
+	Optional<SocketIOClient.Socket>,
+	Optional<SocketIOClient.Socket>
+>(
+	(state) => state.app.socket,
+	(socket) => socket
+);
+
+export { selectActivePage, selectSocket };
