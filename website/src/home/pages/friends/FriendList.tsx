@@ -1,4 +1,5 @@
 import React from 'react';
+import classNames from 'classnames';
 
 import { IconButton } from 'src/common/components';
 import Player from 'src/common/api/player';
@@ -9,14 +10,21 @@ interface FriendListProps {
 
 function FriendList({ friends }: FriendListProps) {
 	function renderItems() {
-		return friends.map(({ id, username }) => (
+		return friends.map(({ id, username, isOnline }) => (
 			<li
 				className="flex flex-row justify-between items-center text-lg"
 				key={id}
 			>
 				<div className="flex flex-col font-medium">
 					<p>{username}</p>
-					<p className="text-sm">Online</p>
+					<p
+						className={classNames(
+							'text-sm',
+							isOnline ? 'text-green-500 font-bold' : 'text-gray-600'
+						)}
+					>
+						{isOnline ? 'Online' : 'Offline'}
+					</p>
 				</div>
 				<div className="flex flex-col space-y-2">
 					<IconButton icon="comments-alt" tooltip={`Message ${username}`} />

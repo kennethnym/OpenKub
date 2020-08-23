@@ -6,13 +6,15 @@ interface IconButtonProps {
 	icon: string;
 	tooltip?: string;
 	onClick?: () => void;
+	className?: string;
 }
 
-function IconButton({ icon, tooltip, onClick }: IconButtonProps) {
+function IconButton({ icon, tooltip, onClick, className }: IconButtonProps) {
 	return (
 		<Tippy content={tooltip}>
 			<i
 				className={classNames(
+					className,
 					'uil',
 					`uil-${icon}`,
 					'text-lg',

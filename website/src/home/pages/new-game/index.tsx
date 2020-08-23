@@ -1,14 +1,22 @@
 import React from 'react';
 
+import GameRoomProvider from './GameRoomContext';
 import Header from '../components/Header';
-import PlayerList from './player-list';
+import GameRoom from './GameRoom';
+import GameRoomConfigView from './GameRoomConfigView';
 
-function NewGamePage() {
+interface NewGamePageProps {
+	initialGame?: GameRoom;
+}
+
+function NewGamePage({ initialGame }: NewGamePageProps) {
 	return (
-		<div className="flex flex-col w-full px-8 lg:w-1/2 lg:px-0">
-			<Header>New game</Header>
-			<PlayerList players={[]} />
-		</div>
+		<GameRoomProvider initialGame={initialGame}>
+			<div className="flex flex-col w-full px-8 pb-16 lg:w-1/2 lg:px-0">
+				<Header>New game</Header>
+				<GameRoomConfigView />
+			</div>
+		</GameRoomProvider>
 	);
 }
 

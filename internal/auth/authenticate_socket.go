@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/MrCreeper1008/OpenKub/internal/ctxval"
 	"github.com/MrCreeper1008/OpenKub/internal/errcode"
@@ -20,13 +21,14 @@ func AuthenticateSocket(c socketio.Conn, username string, password string) {
 	ctx := c.Context().(map[string]interface{})
 	db := ctx[ctxval.DbClient].(*pg.DB)
 
-	playerObj := &player.Player{}
-	playerModel := db.Model(playerObj)
+	playerObj := player.Player{}
+	playerModel := db.Model(&playerObj)
 	exists, err := playerModel.Where("username = ?", username).Exists()
 
 	if err != nil {
 		fmt.Printf("err %v\n", err)
 		c.Emit("exception", map[string]string{
+			"event": "authentication",
 			"error": errcode.UnexpectedError,
 		})
 		return
@@ -44,6 +46,7 @@ func AuthenticateSocket(c socketio.Conn, username string, password string) {
 	if err != nil {
 		fmt.Printf("err %v\n", err)
 		c.Emit("exception", map[string]string{
+			"event": "authentication",
 			"error": errcode.UnexpectedError,
 		})
 		return
@@ -55,6 +58,7 @@ func AuthenticateSocket(c socketio.Conn, username string, password string) {
 
 	if err != nil {
 		c.Emit("unauthenticated", map[string]string{
+			"event": "authentication",
 			"error": incorrectPassword,
 		})
 		return
@@ -62,36 +66,24 @@ func AuthenticateSocket(c socketio.Conn, username string, password string) {
 
 	fmt.Printf("successful authentication\n")
 
-	ctx[ctxval.UserID] = playerObj.ID
-
-	redisClient := ctx[ctxval.RedisClient].(*redis.Client)
-
-	// check if this player is already online
-	isOnline, err := redisClient.SIsMember(service.RedisCtx, service.RedisKeyOnlinePlayer, playerObj.ID).Result()
-
-	fmt.Println("askdjaskjdkasjdkasjk")
+	ctx[ctxval.Player] = playerObj
 
 	if err != nil {
 		fmt.Printf("err %v\n", err)
 		c.Emit("exception", map[string]string{
+			"event": "authentication",
 			"error": errcode.UnexpectedError,
 		})
 		return
 	}
 
-	fmt.Println("askdjaskjdkasjdkasjk")
-
-	if isOnline {
-		c.Emit("unauthenticated", map[string]string{
-			"error": playerAlreadyOnline,
-		})
-		return
-	}
+	redisClient := ctx[ctxval.RedisClient].(*redis.Client)
 
 	err = redisClient.SAdd(service.RedisCtx, service.RedisKeyOnlinePlayer, playerObj.ID).Err()
 
 	if err != nil {
 		c.Emit("exception", map[string]string{
+			"event": "authentication",
 			"error": errcode.UnexpectedError,
 		})
 		return
@@ -99,6 +91,12 @@ func AuthenticateSocket(c socketio.Conn, username string, password string) {
 
 	// remove this socket from the set of unauthenticated connections
 	// to prevent it from being automatically disconnected
-	delete(ctx[ctxval.UnauthenticatedConn].(map[string]socketio.Conn), c.ID())
+	delete(ctx[ctxval.UnauthenticatedConns].(map[string]UnauthenticatedConn), c.ID())
+	(ctx[ctxval.ActiveConns].(map[int]socketio.Conn))[playerObj.ID] = c
+
+	server := ctx[ctxval.SocketServer].(*socketio.Server)
+
 	c.Emit("authenticated")
+	server.BroadcastToRoom("/", "all", strconv.Itoa(playerObj.ID)+"_connected")
+	c.Join("all")
 }

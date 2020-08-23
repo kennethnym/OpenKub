@@ -10,6 +10,11 @@ function isFriend(
 	return relationship.type === 'FRIEND';
 }
 
+const selectPlayer = createSelector<RootStore, Player, Player>(
+	(state) => state.player,
+	(player) => player
+);
+
 /**
  * Selects players that are friends of the current player
  */
@@ -21,4 +26,12 @@ const selectPlayerFriends = createSelector<RootStore, Relationship[], Player[]>(
 			.map((relationship) => relationship.to)
 );
 
-export { selectPlayerFriends };
+/**
+ * Selects friends of the current player that are also online
+ */
+const selectOnlineFriends = createSelector<RootStore, Player[], Player[]>(
+	selectPlayerFriends,
+	(friends) => friends.filter((friend) => friend.isOnline)
+);
+
+export { selectPlayer, selectPlayerFriends, selectOnlineFriends };

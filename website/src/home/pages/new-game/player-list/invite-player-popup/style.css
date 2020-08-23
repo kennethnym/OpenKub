@@ -1,0 +1,8 @@
+.popup-content {
+	max-height: calc(100vh / 2);
+	overflow: scroll;
+}
+
+.online-friend-list {
+	margin : 0 -1rem;
+}

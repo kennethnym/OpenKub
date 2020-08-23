@@ -1,5 +1,3 @@
-import React from 'react';
-
 import FriendsPage from './pages/friends';
 import NewGamePage from './pages/new-game';
 
@@ -15,7 +13,7 @@ enum Tab {
  * Describes the properties of a tab page
  */
 interface TabPage {
-	page: React.FC;
+	page: (props: Record<string, unknown>) => JSX.Element;
 	label: string;
 	icon: string;
 }

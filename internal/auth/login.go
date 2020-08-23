@@ -7,8 +7,10 @@ import (
 	"github.com/MrCreeper1008/OpenKub/internal/ctxval"
 	"github.com/MrCreeper1008/OpenKub/internal/errcode"
 	"github.com/MrCreeper1008/OpenKub/internal/player"
+	"github.com/MrCreeper1008/OpenKub/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/go-pg/pg/v10"
+	"github.com/go-redis/redis/v8"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -69,6 +71,18 @@ func LoginHandler(ctx *gin.Context) {
 		return
 	}
 
+	redisClient := ctx.MustGet(ctxval.RedisClient).(*redis.Client)
+
+	// check if this player is already online
+	isOnline, err := redisClient.SIsMember(service.RedisCtx, service.RedisKeyOnlinePlayer, playerObj.ID).Result()
+
+	if isOnline {
+		ctx.JSON(http.StatusConflict, map[string]string{
+			"error": playerAlreadyOnline,
+		})
+		return
+	}
+
 	relationships := []player.Relationship{}
 
 	// We are separating queries here because currently there's a bug
@@ -87,6 +101,30 @@ func LoginHandler(ctx *gin.Context) {
 			"message": "An error occurred when getting player information.",
 		})
 		return
+	}
+
+	// check if friends are online
+	for i, relationship := range relationships {
+		if relationship.Type != player.RelationshipFriend {
+			relationship.To.IsOnline = false
+		} else {
+			redisClient := ctx.MustGet(ctxval.RedisClient).(*redis.Client)
+			isOnline, err := redisClient.SIsMember(
+				service.RedisCtx,
+				service.RedisKeyOnlinePlayer,
+				relationship.To.ID,
+			).Result()
+
+			if err != nil {
+				fmt.Printf("err 2.5, %v\n", err)
+				ctx.JSON(http.StatusInternalServerError, map[string]string{
+					"error": errcode.UnexpectedError,
+				})
+				return
+			}
+
+			relationships[i].To.IsOnline = isOnline
+		}
 	}
 
 	playerObj.Relationships = relationships

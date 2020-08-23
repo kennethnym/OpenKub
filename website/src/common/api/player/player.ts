@@ -5,6 +5,7 @@ interface Player {
 	id: number;
 	username: string;
 	relationships: Relationship[];
+	isOnline: boolean;
 }
 
 type RelationshipType = 'FRIEND' | 'BLOCKED';

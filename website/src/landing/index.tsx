@@ -93,6 +93,9 @@ function Landing() {
 					'Username has already been taken. Try come on with another one.'
 				);
 				break;
+			case Auth.ErrorCodes.PLAYER_ALREADY_ONLINE:
+				toast.error('You are already logged in in another window/tab.');
+				break;
 			default:
 				toast.error('Unexpected error occurred. Please try again later');
 				break;

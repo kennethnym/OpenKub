@@ -9,6 +9,7 @@ import (
 	"github.com/MrCreeper1008/OpenKub/internal/auth"
 	"github.com/MrCreeper1008/OpenKub/internal/config"
 	"github.com/MrCreeper1008/OpenKub/internal/ctxval"
+	"github.com/MrCreeper1008/OpenKub/internal/game"
 	"github.com/gin-gonic/gin"
 	engineio "github.com/googollee/go-engine.io"
 	"github.com/googollee/go-engine.io/transport"
@@ -57,21 +58,27 @@ func Initialize(ctx map[string]interface{}) *socketio.Server {
 
 // defineEvents defines socket events that the server will handle
 func defineEvents(server *socketio.Server, ctx map[string]interface{}) {
-	unauthenticatedConn := map[string]socketio.Conn{}
+	// a map of session id to its corresponding socket connection
+	unauthenticatedConns := map[string]auth.UnauthenticatedConn{}
+	// a map of user id to their active socket connection
+	activeConns := map[int]socketio.Conn{}
+	// a map of user id to the game room they are hosting
+	activeGames := map[string]*game.Room{}
 
 	kickTicker := time.NewTicker(time.Second * 5)
 
-	// a goroutine that kicks unauthenticated sockets every 5 second
 	go func() {
-		for {
-			<-kickTicker.C
-			kickUnauthenticatedSockets(unauthenticatedConn)
-		}
+		<-kickTicker.C
+		kickUnauthenticatedSockets(unauthenticatedConns)
 	}()
 
 	server.OnConnect("/", func(c socketio.Conn) error {
 		socketCtx := map[string]interface{}{
-			ctxval.UnauthenticatedConn: unauthenticatedConn,
+			ctxval.UnauthenticatedConns: unauthenticatedConns,
+			ctxval.ActiveConns:          activeConns,
+			ctxval.SocketServer:         server,
+			ctxval.ActiveGames:          activeGames,
+			ctxval.InGameRoomID:         "",
 		}
 
 		// copy initial context values to socketCtx
@@ -81,18 +88,23 @@ func defineEvents(server *socketio.Server, ctx map[string]interface{}) {
 
 		c.SetContext(socketCtx)
 
-		unauthenticatedConn[c.ID()] = c
+		unauthenticatedConns[c.ID()] = auth.UnauthenticatedConn{
+			JoinedOn: time.Now(),
+			Conn:     c,
+		}
 
 		fmt.Printf("socket connected: %v\n", c.ID())
 
 		return nil
 	})
 
-	server.OnEvent("/", "authentication", auth.AuthenticateSocket)
-
 	server.OnDisconnect("/", handleDisconnection)
 
 	server.OnEvent("/", "test", func(c socketio.Conn, msg string) {
 		fmt.Printf("received: %v\n", msg)
 	})
+
+	server.OnEvent("/", "authentication", auth.AuthenticateSocket)
+
+	game.DefineGameEvents(server)
 }

@@ -4,4 +4,9 @@ import Player from '../player';
 
 const setPlayer = createAction<Player>('SET_PLAYER');
 
-export { setPlayer };
+const changePlayerOnlineStatus = createAction<{
+	playerID: number;
+	isOnline: boolean;
+}>('CHANGE_PLAYER_ONLINE_STATUS');
+
+export { changePlayerOnlineStatus, setPlayer };

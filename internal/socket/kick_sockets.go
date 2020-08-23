@@ -2,17 +2,22 @@ package socket
 
 import (
 	"fmt"
+	"time"
 
-	socketio "github.com/googollee/go-socket.io"
+	"github.com/MrCreeper1008/OpenKub/internal/auth"
 )
 
-func kickUnauthenticatedSockets(conns map[string]socketio.Conn) {
+// kickUnauthenticatedSockets kicks unauthenticated socket connections
+// when they haven't authenticated themselves in 5 seconds
+func kickUnauthenticatedSockets(conns map[string]auth.UnauthenticatedConn) {
 	fmt.Printf("conns %v\n", conns)
 
 	for id, conn := range conns {
-		err := conn.Close()
-		if err == nil {
-			delete(conns, id)
+		if time.Now().Sub(conn.JoinedOn).Seconds() > 5 {
+			err := conn.Conn.Close()
+			if err == nil {
+				delete(conns, id)
+			}
 		}
 	}
 }
