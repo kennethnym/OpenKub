@@ -42,6 +42,8 @@ func createGame(c socketio.Conn, roomJSON string) {
 		Players: map[int]player.Player{
 			currentPlayer.ID: currentPlayer,
 		},
+		PlayersOrder:       []int{currentPlayer.ID},
+		CurrentPlayerIndex: -1,
 	}
 
 	activeGames[roomID] = room

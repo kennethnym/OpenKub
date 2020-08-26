@@ -1,4 +1,4 @@
-import { createSelector } from '@reduxjs/toolkit';
+import { createSelector, Selector } from '@reduxjs/toolkit';
 
 import { RootStore } from 'src/store';
 
@@ -10,28 +10,29 @@ function isFriend(
 	return relationship.type === 'FRIEND';
 }
 
-const selectPlayer = createSelector<RootStore, Player, Player>(
-	(state) => state.player,
-	(player) => player
-);
+const selectPlayer: Selector<RootStore, Player> = (state) => state.player;
+
+const selectPlayerID = createSelector(selectPlayer, (player) => player.id);
 
 /**
  * Selects players that are friends of the current player
  */
-const selectPlayerFriends = createSelector<RootStore, Relationship[], Player[]>(
-	(state) => state.player.relationships,
-	(relationships) =>
-		relationships
-			.filter<Relationship<'FRIEND'>>(isFriend)
-			.map((relationship) => relationship.to)
+const selectPlayerFriends = createSelector(selectPlayer, (player) =>
+	player.relationships
+		.filter<Relationship<'FRIEND'>>(isFriend)
+		.map((relationship) => relationship.to)
 );
 
 /**
  * Selects friends of the current player that are also online
  */
-const selectOnlineFriends = createSelector<RootStore, Player[], Player[]>(
-	selectPlayerFriends,
-	(friends) => friends.filter((friend) => friend.isOnline)
+const selectOnlineFriends = createSelector(selectPlayerFriends, (friends) =>
+	friends.filter((friend) => friend.isOnline)
 );
 
-export { selectPlayer, selectPlayerFriends, selectOnlineFriends };
+export {
+	selectPlayer,
+	selectPlayerID,
+	selectPlayerFriends,
+	selectOnlineFriends,
+};

@@ -1,15 +1,14 @@
-import React, { useContext } from 'react';
+import React from 'react';
 
 import Player, { PlayerStore } from 'src/common/api/player';
+import { GameRoomStore } from 'src/common/api/game-room';
 import { IconButton } from 'src/common/components';
 import { useRootSelector } from 'src/store';
 import { useSocket } from 'src/common/api/socket';
 
-import GameRoomProvider from '../../GameRoomContext';
-
 function OnlineFriendsList() {
 	const { socket } = useSocket();
-	const gameRoom = useContext(GameRoomProvider.Context);
+	const gameRoom = useRootSelector(GameRoomStore.selectGameRoom)!;
 	const onlineFriends = useRootSelector<Player[]>(
 		PlayerStore.selectOnlineFriends
 	);

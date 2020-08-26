@@ -5,5 +5,5 @@ import { Page } from '../pages';
  */
 export interface AppState {
 	activePage: Page;
-	socket?: SocketIOClient.Socket;
+	socket: Nullable<SocketIOClient.Socket>;
 }

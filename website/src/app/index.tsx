@@ -7,6 +7,7 @@ import { SocketProvider } from 'src/common/api/socket';
 import ActivePage from './App';
 
 function App() {
+	console.log('App');
 	return (
 		<React.StrictMode>
 			<SocketProvider>

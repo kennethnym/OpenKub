@@ -1,20 +1,21 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import Tippy from '@tippyjs/react';
 import isEmpty from 'lodash.isempty';
 
+import PlayerStore from 'src/common/api/player/store';
+import { GameRoomStore } from 'src/common/api/game-room';
 import { IconButton } from 'src/common/components';
 import { useRootSelector } from 'src/store';
 import { useSocket } from 'src/common/api/socket';
-import PlayerStore from 'src/common/api/player/store';
 
 import InvitePlayerPopup from './invite-player-popup';
-import GameRoomProvider from '../GameRoomContext';
 
 function PlayerList() {
 	const [showInvitePlayersPopup, setShowInvitePlayerPopup] = useState(false);
 	const { socket } = useSocket();
 	const player = useRootSelector(PlayerStore.selectPlayer);
-	const gameRoom = useContext(GameRoomProvider.Context);
+	const gameRoom = useRootSelector(GameRoomStore.selectGameRoom)!;
+	const isPlayerHosting = useRootSelector(GameRoomStore.isPlayerHosting);
 
 	function toggleInvitePlayersPopup() {
 		setShowInvitePlayerPopup(!showInvitePlayersPopup);
@@ -22,12 +23,13 @@ function PlayerList() {
 
 	function kickPlayer(playerID: number) {
 		return () => {
-			socket?.emit('kick_player', gameRoom.id, playerID);
+			if (playerID !== player.id) {
+				socket?.emit('kick_player', gameRoom.id, playerID);
+			}
 		};
 	}
 
 	function renderPlayers() {
-		console.log('renderPlayers', gameRoom.isPlayerReady);
 		const players = gameRoom.players;
 
 		if (isEmpty(players)) {
@@ -44,13 +46,14 @@ function PlayerList() {
 							<li className="flex justify-between">
 								<div className="flex flex-1">
 									<p className="w-1/6 truncate mr-2">{username}</p>
-									{gameRoom.isPlayerReady!(currentPlayer) && (
+									{id.toString() in gameRoom.playersReady && (
 										<p className="font-bold text-green-500">Ready</p>
 									)}
 								</div>
-								{id !== player.id && gameRoom.isHost!(player) && (
+								{isPlayerHosting && (
 									<IconButton
 										icon="times"
+										className={id !== player.id ? '' : 'invisible'}
 										tooltip={`Remove ${username} from game`}
 										onClick={kickPlayer(id)}
 									/>

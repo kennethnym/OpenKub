@@ -1,12 +1,12 @@
 import React, { useContext } from 'react';
 
 interface SocketContextValue {
-	socket: Optional<SocketIOClient.Socket>;
+	socket: Nullable<SocketIOClient.Socket>;
 	initializeSocket: () => void;
 }
 
 const SocketContext = React.createContext<SocketContextValue>({
-	socket: undefined,
+	socket: null,
 	initializeSocket: () => {},
 });
 

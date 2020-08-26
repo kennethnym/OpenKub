@@ -9,9 +9,7 @@ interface SocketProviderProps {
 }
 
 function SocketProvider({ children }: SocketProviderProps) {
-	const [socket, setSocket] = useState<Optional<SocketIOClient.Socket>>(
-		undefined
-	);
+	const [socket, setSocket] = useState<Nullable<SocketIOClient.Socket>>(null);
 
 	function initializeSocket() {
 		console.log('initialize');

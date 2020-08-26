@@ -2,7 +2,9 @@ package main
 
 import (
 	"log"
+	"math/rand"
 	"net/http"
+	"time"
 
 	"github.com/MrCreeper1008/OpenKub/internal/auth"
 	"github.com/MrCreeper1008/OpenKub/internal/config"
@@ -18,6 +20,7 @@ import (
 )
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
 	initServer()
 }
 

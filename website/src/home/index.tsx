@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { toast, ToastContainer, Slide } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 
+import { GameRoomStore } from 'src/common/api/game-room';
 import Player, { PlayerStore } from 'src/common/api/player';
 import { useSocket } from 'src/common/api/socket';
 import { useRootSelector } from 'src/store';
@@ -9,7 +10,6 @@ import { useRootSelector } from 'src/store';
 import { TAB_PAGES, Tab } from './pages';
 import Menu from './menu';
 import GameInvitePopup from './GameInvitePopup';
-import GameRoom from './pages/new-game/GameRoom';
 
 function Home() {
 	const [selectedTab, setSelectedTab] = useState({
@@ -18,7 +18,7 @@ function Home() {
 	});
 	const { socket } = useSocket();
 	const dispatch = useDispatch();
-	const gameInvitePopup = useRef<React.ReactText | null>(null);
+	const gameInvitePopup = useRef<Nullable<React.ReactText>>(null);
 	const playerFriends = useRootSelector<Player[]>(
 		PlayerStore.selectPlayerFriends
 	);
@@ -83,10 +83,10 @@ function Home() {
 				);
 			})
 			?.on('game_joined', (roomJSON: string) => {
-				console.log('game joined', roomJSON);
+				dispatch(GameRoomStore.actions.initialize(JSON.parse(roomJSON)));
 				setSelectedTab({
 					name: Tab.NEW_GAME,
-					props: { initialGame: new GameRoom(roomJSON) },
+					props: {},
 				});
 			})
 			?.on('kicked_from_game', () => {

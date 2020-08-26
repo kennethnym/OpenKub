@@ -1,24 +1,26 @@
-import React, { useContext } from 'react';
-import isEmpty from 'lodash.isempty';
+import React from 'react';
 
+import { GameRoomStore } from 'src/common/api/game-room';
+import { PlayerStore } from 'src/common/api/player';
 import { Button } from 'src/common/components';
 import { useSocket } from 'src/common/api/socket';
 import { useRootSelector } from 'src/store';
-import { PlayerStore } from 'src/common/api/player';
 
-import GameRoomProvider from './GameRoomContext';
 import PlayerList from './player-list';
 
 function GameRoomConfigView() {
+	const gameRoom = useRootSelector(GameRoomStore.selectGameRoom)!;
+	const isPlayerReady = useRootSelector(GameRoomStore.isPlayerReady);
+	const isPlayerHosting = useRootSelector(GameRoomStore.isPlayerHosting);
+	const canStartGame = useRootSelector(GameRoomStore.canStartGame);
+	const playerID = useRootSelector(PlayerStore.selectPlayerID);
 	const { socket } = useSocket();
-	const player = useRootSelector(PlayerStore.selectPlayer);
-	const gameRoom = useContext(GameRoomProvider.Context);
 
 	function readyPlayer() {
 		socket?.emit(
-			gameRoom.isPlayerReady!(player) ? 'player_unready' : 'player_ready',
-			gameRoom.id,
-			player.id
+			isPlayerReady ? 'player_unready' : 'player_ready',
+			gameRoom!.id,
+			playerID
 		);
 	}
 
@@ -26,22 +28,16 @@ function GameRoomConfigView() {
 		socket?.emit('start_game', gameRoom.id);
 	}
 
-	if (isEmpty(gameRoom)) {
-		return <p>Contacting server...</p>;
-	}
-
-	console.log('gameRoom', gameRoom!.playersReady!.size);
-
 	return (
 		<>
 			<PlayerList />
-			<div className="flex-auto" />
+			<div className="flexGameRoom-auto" />
 			<div className="flex space-x-4 self-stretch justify-end">
 				<Button onClick={readyPlayer}>
-					{gameRoom.isPlayerReady!(player) ? 'Unready' : 'Ready'}
+					{isPlayerReady ? 'Unready' : 'Ready'}
 				</Button>
-				{gameRoom.isHost!(player) && (
-					<Button disabled={!gameRoom.isAllPlayersReady!()} onClick={startGame}>
+				{isPlayerHosting && (
+					<Button disabled={!canStartGame} onClick={startGame}>
 						Start game
 					</Button>
 				)}

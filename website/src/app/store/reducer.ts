@@ -8,7 +8,8 @@ import { Page } from '../pages';
 import { changePage, initializeSocketIO } from './actions';
 
 const initialState: AppState = {
-	activePage: Page.LANDING,
+	activePage: Page.IN_GAME,
+	socket: null,
 };
 
 const reducer = createReducer(initialState, {
