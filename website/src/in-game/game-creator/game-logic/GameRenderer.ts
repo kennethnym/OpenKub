@@ -1,29 +1,47 @@
 import * as Pixi from 'pixi.js';
 
-import { Coordinate, Tile } from './types';
+import { Coordinate, Rect, Tile } from './types';
 import {
+	DECK_HEIGHT,
 	TILE_COLOR_MAP,
 	TILE_CORNER_RADIUS,
 	TILE_HEIGHT,
 	TILE_WIDTH,
 } from './constants';
 import TileInteractivity from './TileInteractivity';
+import EventCommunicator from './EventCommunicator';
+import GameStateManager from './GameStateManager';
+import { isRectInRect } from './utils';
+
+interface Dependencies {
+	communicator: EventCommunicator;
+	stateManager: GameStateManager;
+}
 
 /**
- * GameRenderer renders Rummikub elements
+ * GameRenderer handles graphical elements of the game
  */
 class GameRenderer {
-	private readonly width: number;
-	private readonly height: number;
 	private readonly renderer: Pixi.Application;
-	public selectedTiles = new Set<Pixi.Graphics>();
-	public renderedTiles = new Set<Pixi.Graphics>();
+	private readonly communicator: EventCommunicator;
+	private readonly stateManager: GameStateManager;
 
-	constructor() {
+	readonly width: number;
+	readonly height: number;
+	readonly deck: Rect;
+
+	constructor({ communicator, stateManager }: Dependencies) {
+		this.communicator = communicator;
+		this.stateManager = stateManager;
+
 		const container = document.getElementById('pixi-container')!;
 
 		this.width = container.clientWidth;
 		this.height = container.clientHeight;
+		this.deck = {
+			topLeft: [0, this.height - DECK_HEIGHT],
+			bottomRight: [this.width, this.height],
+		};
 		this.renderer = new Pixi.Application({
 			width: this.width,
 			height: this.height,
@@ -35,6 +53,20 @@ class GameRenderer {
 
 	renderDeck(deck: Tile[]) {
 		const xOffset = this.width / 2 - (7 * TILE_WIDTH) / 2;
+
+		const deckBackground = new Pixi.Graphics();
+
+		deckBackground
+			.beginFill(0xe2e8f0)
+			.drawRect(
+				this.deck.topLeft[0],
+				this.deck.topLeft[1],
+				this.width,
+				DECK_HEIGHT
+			)
+			.endFill();
+
+		this.renderer.stage.addChild(deckBackground);
 
 		deck.forEach((tile, i) => {
 			this.renderTile(
@@ -70,9 +102,19 @@ class GameRenderer {
 			.endFill()
 			.addChild(tileText);
 
-		this.renderedTiles.add(rect);
+		const renderedTile: Tile = {
+			...tile,
+			position: [x, y],
+			renderObject: rect,
+		};
 
-		new TileInteractivity(rect, { gameRenderer: this });
+		this.stateManager.addRenderedTile(renderedTile);
+
+		new TileInteractivity(renderedTile, {
+			gameRenderer: this,
+			stateManager: this.stateManager,
+			communicator: this.communicator,
+		});
 
 		this.renderer.stage.addChild(rect);
 	}
@@ -92,6 +134,35 @@ class GameRenderer {
 
 	clearSnapIndicator(indicator: Nullable<Pixi.Graphics>) {
 		if (indicator) this.renderer.stage.removeChild(indicator);
+	}
+
+	/**
+	 * Given a tile position, determine if that position is in deck
+	 */
+	isTilePositionInDeck(pos: Coordinate) {
+		return isRectInRect(
+			{
+				topLeft: pos,
+				bottomRight: [pos[0] + TILE_WIDTH, pos[1] + TILE_HEIGHT],
+			},
+			this.deck
+		);
+	}
+
+	clearInvalidGroupHighlights() {
+		for (const invalidGroupID of this.stateManager.invalidGroups) {
+			for (const tile of this.stateManager.tileGroups.get(invalidGroupID)!) {
+				tile.renderObject!.tint = 0xffffff;
+			}
+		}
+	}
+
+	highlightInvalidGroups() {
+		for (const invalidGroupID of this.stateManager.invalidGroups) {
+			for (const tile of this.stateManager.tileGroups.get(invalidGroupID)!) {
+				tile.renderObject!.tint = 0xffaaaa;
+			}
+		}
 	}
 }
 
