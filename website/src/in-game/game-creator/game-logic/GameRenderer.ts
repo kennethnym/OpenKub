@@ -29,6 +29,7 @@ class GameRenderer {
 	readonly width: number;
 	readonly height: number;
 	readonly deck: Rect;
+	readonly interactionLayer: Pixi.Graphics;
 
 	constructor({ communicator, stateManager }: Dependencies) {
 		this.communicator = communicator;
@@ -49,6 +50,28 @@ class GameRenderer {
 		});
 
 		container.appendChild(this.renderer.view);
+
+		this.interactionLayer = this.renderInteractionLayer();
+	}
+
+	/**
+	 * Renders a global interaction layer that is as big as the renderer
+	 */
+	private renderInteractionLayer() {
+		const layer = new Pixi.Graphics();
+
+		layer.interactive = true;
+
+		layer
+			.beginFill(0x0, 0.01)
+			.drawRect(0, 0, this.width, this.height)
+			.on('mousedown', () => {
+				console.log('asdsadasd');
+			});
+
+		this.renderer.stage.addChild(layer);
+
+		return layer;
 	}
 
 	renderDeck(deck: Tile[]) {

@@ -258,9 +258,59 @@ class TileInteractivity {
 						}
 					});
 				} else {
-					// this tile is not in any group
-					// it will form a group of its own
-					this.stateManager.addPlacedTile(tile).addTileGroup([tile]);
+					// this tile is taken from the deck
+					// we check if there are other selected tiles next to this tile
+					// they will be in the same group
+					const leftTiles = [];
+					const rightTiles = [];
+
+					const leftPos: Coordinate = [
+						tile.position![0] - TILE_WIDTH,
+						tile.position![1],
+					];
+					const rightPos: Coordinate = [
+						tile.position![0] + TILE_WIDTH,
+						tile.position![1],
+					];
+
+					let hasLeftTile = false;
+					let hasRightTile = false;
+
+					do {
+						let leftTile;
+						let rightTile;
+
+						for (const tile of this.stateManager.selectedTiles) {
+							if (processedTiles.has(tile.id)) continue;
+							if (
+								tile.position![0] === leftPos[0] &&
+								tile.position![1] === leftPos[1]
+							) {
+								leftTile = tile;
+								leftPos[0] = tile.position![0] - TILE_WIDTH;
+								processedTiles.add(tile.id);
+								leftTiles.push(leftTile);
+								break;
+							}
+							if (
+								tile.position![0] === rightPos[0] &&
+								tile.position![1] === rightPos[1]
+							) {
+								rightTile = tile;
+								rightPos[0] = tile.position![0] + TILE_WIDTH;
+								processedTiles.add(tile.id);
+								rightTiles.push(rightTile);
+								break;
+							}
+						}
+
+						hasLeftTile = leftTile !== undefined;
+						hasRightTile = rightTile !== undefined;
+					} while (hasLeftTile || hasRightTile);
+
+					this.stateManager
+						.addPlacedTile(tile)
+						.addTileGroup([...leftTiles.reverse(), tile, ...rightTiles]);
 				}
 			}
 		} else if (
@@ -402,6 +452,8 @@ class TileInteractivity {
 				this.stateManager.addTileGroup([this.tile]);
 			}
 		}
+
+		console.log('placed tiles', this.stateManager.tileGroups);
 	}
 
 	onMouseOver = () => {
