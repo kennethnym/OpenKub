@@ -1,10 +1,10 @@
 import React from 'react';
 
-import { TileColor } from './game-creator/game-logic';
-import { useGameCreator } from './game-creator';
+import { TileColor } from './game-controller/game-logic';
+import { useGameController } from './game-controller';
 
 function InGame() {
-	const { renderer, gameStateManager, eventCommunicator } = useGameCreator();
+	const { renderer, gameStateManager, eventCommunicator } = useGameController();
 
 	function draw() {
 		renderer?.renderDeck([

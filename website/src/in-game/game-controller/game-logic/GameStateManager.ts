@@ -22,11 +22,19 @@ class GameStateManager {
 		return this;
 	}
 
+	/**
+	 * Keeps track of a placed tile
+	 * @param tile
+	 */
 	addPlacedTile(tile: Tile) {
 		this.placedTiles.set(tile.id, tile);
 		return this;
 	}
 
+	/**
+	 * Forgets a placed tile. Actual remove logic is in TileInteractivity.placeTile
+	 * @param tile
+	 */
 	removePlacedTile(tile: Tile) {
 		this.placedTiles.delete(tile.id);
 		return this;
@@ -49,6 +57,34 @@ class GameStateManager {
 			this.tileGroups.delete(tile.tileGroup);
 			return this;
 		}
+
+		// when a tile is removed from a group
+		// 2-3 new groups are created on the left and on the right
+		//
+		// for example:
+		//
+		//
+		// [] = tile
+		//
+		// prevGroupIndex is 2
+		//
+		// left     right <-- three new groups are created
+		// ----- -- -----
+		// [] [] [] [] []
+		//       ^^
+		//       suppose this is the tile to be removed.
+		//       it will form a group of its own
+		//
+		// example 2: only two groups are created.
+		//
+		// prevGroupIndex is 0.
+		// leftGroup.length is 0.
+		//
+		//    right    <-- two new groups are created
+		// -- --------
+		// [] [] [] []
+		// ^^
+		// remove this.
 
 		const prevGroupIndex = prevGroup.findIndex(({ id }) => id === tile.id);
 		const leftGroup = prevGroup.slice(0, prevGroupIndex);

@@ -74,6 +74,10 @@ class GameRenderer {
 		return layer;
 	}
 
+	/**
+	 * Renders the deck and the initial 14 tiles.
+	 * @param deck {Tile[]} The initial tiles to be rendered
+	 */
 	renderDeck(deck: Tile[]) {
 		const xOffset = this.width / 2 - (7 * TILE_WIDTH) / 2;
 
@@ -100,6 +104,12 @@ class GameRenderer {
 		});
 	}
 
+	/**
+	 * Renders the given tile at the given coordinate (top left)
+	 * @param x {number} The x-coordinate of the top left of the tile
+	 * @param y {number} The y-coordinate of the top right of the tile
+	 * @param tile {Tile} The tile to be rendered
+	 */
 	renderTile(x: number, y: number, tile: Tile) {
 		const rect = new Pixi.Graphics();
 		const tileText = new Pixi.Text(tile.num < 0 ? ":')" : tile.num.toString(), {
@@ -142,6 +152,12 @@ class GameRenderer {
 		this.renderer.stage.addChild(rect);
 	}
 
+	/**
+	 * Renders a snap indicator indicating that the tile being dragged
+	 * can snap to the position of the indicator.
+	 * @param x {number} The x-coordinate of the top left corner of the indicator
+	 * @param y {number} The y-coordinate of the top left corner of the indicator
+	 */
 	renderSnapIndicator([x, y]: Coordinate) {
 		const rect = new Pixi.Graphics();
 
@@ -155,6 +171,12 @@ class GameRenderer {
 		return rect;
 	}
 
+	/**
+	 * Removes a snap indicator. This will be called when a tile can no longer
+	 * be snapped to the location of the indicator, possibly because the tile
+	 * is too far away.
+	 * @param indicator {Pixi.Graphics} The render object of the indicator
+	 */
 	clearSnapIndicator(indicator: Nullable<Pixi.Graphics>) {
 		if (indicator) this.renderer.stage.removeChild(indicator);
 	}
@@ -172,18 +194,18 @@ class GameRenderer {
 		);
 	}
 
-	clearInvalidGroupHighlights() {
-		for (const invalidGroupID of this.stateManager.invalidGroups) {
-			for (const tile of this.stateManager.tileGroups.get(invalidGroupID)!) {
-				tile.renderObject!.tint = 0xffffff;
-			}
-		}
-	}
-
 	highlightInvalidGroups() {
 		for (const invalidGroupID of this.stateManager.invalidGroups) {
 			for (const tile of this.stateManager.tileGroups.get(invalidGroupID)!) {
 				tile.renderObject!.tint = 0xffaaaa;
+			}
+		}
+	}
+
+	clearInvalidGroupHighlights() {
+		for (const invalidGroupID of this.stateManager.invalidGroups) {
+			for (const tile of this.stateManager.tileGroups.get(invalidGroupID)!) {
+				tile.renderObject!.tint = 0xffffff;
 			}
 		}
 	}

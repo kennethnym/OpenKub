@@ -7,6 +7,9 @@ import { isRectInRect } from './utils';
 import EventCommunicator, { GameEvent } from './EventCommunicator';
 import GameStateManager from './GameStateManager';
 
+/**
+ * Dependencies that TileInteractivity needs
+ */
 interface Dependencies {
 	gameRenderer: GameRenderer;
 	stateManager: GameStateManager;
@@ -461,6 +464,9 @@ class TileInteractivity {
 		console.log('placed tiles', this.stateManager.tileGroups);
 	}
 
+	/**
+	 * Called whenever the board is clicked.
+	 */
 	private deselectTile() {
 		this.tile.renderObject!.tint = 0xffffff;
 		this.stateManager.selectedTiles.delete(this.tile);
@@ -556,8 +562,11 @@ class TileInteractivity {
 			]);
 		}
 
-		// if this tile has not been moved, select it
-		if (!this.isMoved) {
+		if (this.isMoved) {
+			this.isMoved = false;
+			this.placeTile();
+		} else {
+			// this tile has not been moved. select it.
 			this.isSelected = !this.isSelected;
 			this.tile.renderObject!.tint = this.isSelected
 				? 0xf7f6eb
@@ -568,9 +577,6 @@ class TileInteractivity {
 			} else {
 				this.stateManager.selectedTiles.delete(this.tile);
 			}
-		} else {
-			this.isMoved = false;
-			this.placeTile();
 		}
 
 		this.snapPosition = null;
