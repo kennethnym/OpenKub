@@ -42,12 +42,17 @@ class TileInteractivity {
 		this.communicator = communicator;
 
 		tile
-			.renderObject!.on('mouseover', this.onMouseOver)
-			.on('mouseout', this.onMouseOut)
-			.on('mousedown', this.onMouseDown)
-			.on('mousemove', this.onMouseMove)
-			.on('mouseup', this.onMouseUp)
-			.on('mouseupoutside', this.onMouseUp);
+			.renderObject!.on('mouseover', this.onMouseOver.bind(this))
+			.on('mouseout', this.onMouseOut.bind(this))
+			.on('mousedown', this.onMouseDown.bind(this))
+			.on('mousemove', this.onMouseMove.bind(this))
+			.on('mouseup', this.onMouseUp.bind(this))
+			.on('mouseupoutside', this.onMouseUp.bind(this));
+
+		this.gameRenderer.interactionLayer.on(
+			'mousedown',
+			this.deselectTile.bind(this)
+		);
 	}
 
 	/**
@@ -456,22 +461,27 @@ class TileInteractivity {
 		console.log('placed tiles', this.stateManager.tileGroups);
 	}
 
-	onMouseOver = () => {
-		this.tile.renderObject!.tint = 0xf7f6eb;
-	};
+	private deselectTile() {
+		this.tile.renderObject!.tint = 0xffffff;
+		this.stateManager.selectedTiles.delete(this.tile);
+	}
 
-	onMouseOut = () => {
+	private onMouseOver() {
+		this.tile.renderObject!.tint = 0xf7f6eb;
+	}
+
+	private onMouseOut() {
 		if (!this.isSelected) {
 			this.tile.renderObject!.tint = 0xffffff;
 		}
-	};
+	}
 
-	onMouseDown = (event: Pixi.InteractionEvent) => {
+	private onMouseDown(event: Pixi.InteractionEvent) {
 		this.isDragging = true;
 		this.data = event.data;
-	};
+	}
 
-	onMouseMove = () => {
+	private onMouseMove() {
 		if (this.isDragging) {
 			const domEvent = this.data!.originalEvent as MouseEvent;
 			this.isMoved = true;
@@ -525,9 +535,9 @@ class TileInteractivity {
 				}
 			}
 		}
-	};
+	}
 
-	onMouseUp = () => {
+	private onMouseUp() {
 		this.gameRenderer.clearSnapIndicator(this.snapIndicator);
 		this.snapIndicator = null;
 
@@ -567,7 +577,7 @@ class TileInteractivity {
 		this.snapToTile = null;
 		this.isDragging = false;
 		this.data = null;
-	};
+	}
 }
 
 export default TileInteractivity;
