@@ -1,6 +1,6 @@
-module github.com/MrCreeper1008/OpenKub
+module github.com/kennethnym/OpenKub
 
-go 1.14
+go 1.16
 
 require (
 	github.com/gin-gonic/contrib v0.0.0-20200810162008-6dee08bf958e

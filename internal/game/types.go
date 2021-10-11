@@ -1,6 +1,6 @@
 package game
 
-import "github.com/MrCreeper1008/OpenKub/internal/player"
+import "github.com/kennethnym/OpenKub/internal/player"
 
 // Room defines a game that is being hosted
 type Room struct {

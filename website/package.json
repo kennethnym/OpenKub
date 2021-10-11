@@ -55,7 +55,6 @@
       "@typescript-eslint/explicit-module-boundary-types": "off",
       "prettier/prettier": "warn",
       "react-hooks/rules-of-hooks": "error",
-      "react-hooks/exhaustive-deps": "off",
       "import/order": [
         "error",
         {

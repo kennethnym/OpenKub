@@ -3,10 +3,10 @@ package game
 import (
 	"encoding/json"
 
-	"github.com/MrCreeper1008/OpenKub/internal/ctxval"
-	"github.com/MrCreeper1008/OpenKub/internal/errcode"
-	"github.com/MrCreeper1008/OpenKub/internal/player"
 	socketio "github.com/googollee/go-socket.io"
+	"github.com/kennethnym/OpenKub/internal/ctxval"
+	"github.com/kennethnym/OpenKub/internal/errcode"
+	"github.com/kennethnym/OpenKub/internal/player"
 )
 
 // addPlayerToGame is called when a player has accepted a game invite from another player

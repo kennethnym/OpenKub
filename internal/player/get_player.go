@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/MrCreeper1008/OpenKub/internal/ctxval"
-	"github.com/MrCreeper1008/OpenKub/internal/errcode"
 	"github.com/gin-gonic/gin"
 	"github.com/go-pg/pg/v10"
+	"github.com/kennethnym/OpenKub/internal/ctxval"
+	"github.com/kennethnym/OpenKub/internal/errcode"
 )
 
 // GetPlayer handles calls to /api/player
