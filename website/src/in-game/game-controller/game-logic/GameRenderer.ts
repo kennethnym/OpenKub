@@ -204,8 +204,11 @@ class GameRenderer {
 
 	clearInvalidGroupHighlights() {
 		for (const invalidGroupID of this.stateManager.invalidGroups) {
-			for (const tile of this.stateManager.tileGroups.get(invalidGroupID)!) {
-				tile.renderObject!.tint = 0xffffff;
+			const invalidTileGroup = this.stateManager.tileGroups.get(invalidGroupID);
+			if (invalidTileGroup) {
+				for (const tile of invalidTileGroup) {
+					tile.renderObject!.tint = 0xffffff;
+				}
 			}
 		}
 	}
