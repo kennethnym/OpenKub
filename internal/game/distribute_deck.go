@@ -3,10 +3,10 @@ package game
 import (
 	"encoding/json"
 	"fmt"
-	"math/rand"
 
-	"github.com/MrCreeper1008/OpenKub/internal/ctxval"
 	socketio "github.com/googollee/go-socket.io"
+
+	"github.com/kennethnym/OpenKub/internal/ctxval"
 )
 
 func distributeDeck(socketCtx map[string]interface{}, room *Room) {

@@ -2,10 +2,10 @@ package game
 
 import (
 	"math/rand"
-	"strconv"
 
-	"github.com/MrCreeper1008/OpenKub/internal/ctxval"
 	socketio "github.com/googollee/go-socket.io"
+
+	"github.com/kennethnym/OpenKub/internal/ctxval"
 )
 
 // startGame is called when socket emits "<roomid>:start_game"
@@ -21,7 +21,7 @@ func startGame(c socketio.Conn, roomID string) {
 		"/",
 		roomID,
 		roomID+":start_game",
-		currentGame.PlayersOrder[currentGame.CurrentPlayerIndex]
+		currentGame.PlayersOrder[currentGame.CurrentPlayerIndex],
 	)
 
 	distributeDeck(ctx, currentGame)

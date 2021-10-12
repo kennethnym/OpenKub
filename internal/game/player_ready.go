@@ -1,8 +1,8 @@
 package game
 
 import (
-	"github.com/MrCreeper1008/OpenKub/internal/ctxval"
 	socketio "github.com/googollee/go-socket.io"
+	"github.com/kennethnym/OpenKub/internal/ctxval"
 )
 
 // playerReady is called when socket emits "player_ready"

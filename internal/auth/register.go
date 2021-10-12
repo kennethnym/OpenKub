@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/MrCreeper1008/OpenKub/internal/ctxval"
-	"github.com/MrCreeper1008/OpenKub/internal/errcode"
-	"github.com/MrCreeper1008/OpenKub/internal/player"
 	"github.com/gin-gonic/gin"
 	"github.com/go-pg/pg/v10"
+	"github.com/kennethnym/OpenKub/internal/ctxval"
+	"github.com/kennethnym/OpenKub/internal/errcode"
+	"github.com/kennethnym/OpenKub/internal/player"
 	"golang.org/x/crypto/bcrypt"
 )
 

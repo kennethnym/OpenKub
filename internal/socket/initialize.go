@@ -6,16 +6,16 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/MrCreeper1008/OpenKub/internal/auth"
-	"github.com/MrCreeper1008/OpenKub/internal/config"
-	"github.com/MrCreeper1008/OpenKub/internal/ctxval"
-	"github.com/MrCreeper1008/OpenKub/internal/game"
 	"github.com/gin-gonic/gin"
 	engineio "github.com/googollee/go-engine.io"
 	"github.com/googollee/go-engine.io/transport"
 	"github.com/googollee/go-engine.io/transport/polling"
 	"github.com/googollee/go-engine.io/transport/websocket"
 	socketio "github.com/googollee/go-socket.io"
+	"github.com/kennethnym/OpenKub/internal/auth"
+	"github.com/kennethnym/OpenKub/internal/config"
+	"github.com/kennethnym/OpenKub/internal/ctxval"
+	"github.com/kennethnym/OpenKub/internal/game"
 )
 
 // Handler handles calls to /api/socket

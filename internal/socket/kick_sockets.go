@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/MrCreeper1008/OpenKub/internal/auth"
+	"github.com/kennethnym/OpenKub/internal/auth"
 )
 
 // kickUnauthenticatedSockets kicks unauthenticated socket connections

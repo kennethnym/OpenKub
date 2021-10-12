@@ -6,12 +6,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/MrCreeper1008/OpenKub/internal/ctxval"
-	"github.com/MrCreeper1008/OpenKub/internal/game"
-	"github.com/MrCreeper1008/OpenKub/internal/player"
-	"github.com/MrCreeper1008/OpenKub/internal/service"
 	"github.com/go-redis/redis/v8"
 	socketio "github.com/googollee/go-socket.io"
+	"github.com/kennethnym/OpenKub/internal/ctxval"
+	"github.com/kennethnym/OpenKub/internal/game"
+	"github.com/kennethnym/OpenKub/internal/player"
+	"github.com/kennethnym/OpenKub/internal/service"
 )
 
 // handleDisconnection handles socket disconnection event

@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/MrCreeper1008/OpenKub/internal/ctxval"
-	"github.com/MrCreeper1008/OpenKub/internal/errcode"
-	"github.com/MrCreeper1008/OpenKub/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	"github.com/kennethnym/OpenKub/internal/ctxval"
+	"github.com/kennethnym/OpenKub/internal/errcode"
+	"github.com/kennethnym/OpenKub/internal/service"
 	"github.com/lestrrat-go/jwx/jwa"
 	"github.com/lestrrat-go/jwx/jwt"
 )

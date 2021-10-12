@@ -6,17 +6,18 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/MrCreeper1008/OpenKub/internal/auth"
-	"github.com/MrCreeper1008/OpenKub/internal/config"
-	"github.com/MrCreeper1008/OpenKub/internal/ctxval"
-	"github.com/MrCreeper1008/OpenKub/internal/player"
-	"github.com/MrCreeper1008/OpenKub/internal/service"
-	"github.com/MrCreeper1008/OpenKub/internal/socket"
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	socketio "github.com/googollee/go-socket.io"
 	"github.com/joho/godotenv"
+
+	"github.com/kennethnym/OpenKub/internal/auth"
+	"github.com/kennethnym/OpenKub/internal/config"
+	"github.com/kennethnym/OpenKub/internal/ctxval"
+	"github.com/kennethnym/OpenKub/internal/player"
+	"github.com/kennethnym/OpenKub/internal/service"
+	"github.com/kennethnym/OpenKub/internal/socket"
 )
 
 func main() {
