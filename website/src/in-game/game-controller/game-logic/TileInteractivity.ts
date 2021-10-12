@@ -470,6 +470,7 @@ class TileInteractivity {
 	private deselectTile() {
 		this.tile.renderObject!.tint = 0xffffff;
 		this.stateManager.selectedTiles.delete(this.tile);
+		this.isSelected = false;
 	}
 
 	private onMouseOver() {
