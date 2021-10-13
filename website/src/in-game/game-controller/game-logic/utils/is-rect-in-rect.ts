@@ -1,5 +1,5 @@
+import type { Rect } from '../types';
 import isPointInRect from './is-point-in-rect';
-import { Rect } from '../types';
 
 // mmmmm spaghetti
 function isRectInRect(rect1: Rect, rect2: Rect) {

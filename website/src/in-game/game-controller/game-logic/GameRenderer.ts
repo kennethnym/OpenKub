@@ -1,16 +1,17 @@
 import * as Pixi from 'pixi.js';
 
-import { Coordinate, Rect, Tile } from './types';
+import type { Coordinate, Rect, Tile } from './types';
+import type EventCommunicator from './EventCommunicator';
+import type GameStateManager from './GameStateManager';
 import {
 	DECK_HEIGHT,
+	TILE_BACKGROUND_COLOR,
 	TILE_COLOR_MAP,
 	TILE_CORNER_RADIUS,
 	TILE_HEIGHT,
 	TILE_WIDTH,
 } from './constants';
 import TileInteractivity from './TileInteractivity';
-import EventCommunicator from './EventCommunicator';
-import GameStateManager from './GameStateManager';
 import { isRectInRect } from './utils';
 
 interface Dependencies {
@@ -130,7 +131,7 @@ class GameRenderer {
 
 		rect.position.set(x, y);
 		rect
-			.beginFill(0xfffef2)
+			.beginFill(TILE_BACKGROUND_COLOR)
 			.drawRoundedRect(0, 0, TILE_WIDTH, TILE_HEIGHT, TILE_CORNER_RADIUS)
 			.endFill()
 			.addChild(tileText);

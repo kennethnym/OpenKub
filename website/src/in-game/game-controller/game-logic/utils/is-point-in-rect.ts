@@ -1,4 +1,4 @@
-import { Coordinate, Rect } from '../types';
+import type { Coordinate, Rect } from '../types';
 
 function isPointInRect(point: Coordinate, rect: Rect) {
 	return (

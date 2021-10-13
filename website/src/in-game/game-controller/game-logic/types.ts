@@ -1,4 +1,4 @@
-import * as Pixi from 'pixi.js';
+import type * as Pixi from 'pixi.js';
 
 export enum TileColor {
 	RED,

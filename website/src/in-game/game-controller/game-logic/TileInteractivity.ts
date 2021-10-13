@@ -1,11 +1,12 @@
-import * as Pixi from 'pixi.js';
+import type * as Pixi from 'pixi.js';
 
+import type { Coordinate, Rect, Tile } from './types';
+import type GameRenderer from './GameRenderer';
+import type EventCommunicator from './EventCommunicator';
+import type GameStateManager from './GameStateManager';
 import { TILE_BACKGROUND_COLOR, TILE_HEIGHT, TILE_WIDTH } from './constants';
-import { Coordinate, Rect, Tile } from './types';
-import GameRenderer from './GameRenderer';
 import { isRectInRect } from './utils';
-import EventCommunicator, { GameEvent } from './EventCommunicator';
-import GameStateManager from './GameStateManager';
+import { GameEvent } from './EventCommunicator';
 
 /**
  * Dependencies that TileInteractivity needs

@@ -1,6 +1,6 @@
 import { nanoid } from '@reduxjs/toolkit';
 
-import { Tile } from './types';
+import type { Tile } from './types';
 import { validateTiles } from './utils';
 
 /**
