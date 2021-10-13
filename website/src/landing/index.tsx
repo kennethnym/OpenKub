@@ -2,10 +2,10 @@ import { Slide, toast, ToastContainer } from 'react-toastify';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import type { ErrorResponse } from 'src/common/api';
 import { Button, InputBox } from 'src/common/components/';
 import Auth from 'src/common/api/auth';
 import { useSocket } from 'src/common/api/socket';
-import { ErrorResponse } from 'src/common/api';
 import PlayerStore from 'src/common/api/player/store';
 import AppStore from 'src/app/store';
 import { Page } from 'src/app/pages';
@@ -20,7 +20,7 @@ function Landing() {
 	const { socket, initializeSocket } = useSocket();
 
 	useEffect(() => {
-		console.log('useEffect called');
+		console.log('useEffect called: ', socket);
 
 		if (socket) {
 			socket
@@ -34,6 +34,9 @@ function Landing() {
 					console.log('socket successfully authenticated');
 					setLoggingIn(false);
 					dispatch(AppStore.actions.changePage(Page.HOME));
+				})
+				.on('exception', () => {
+					console.log('');
 				});
 
 			socket.on('disconnect', () => {
@@ -44,9 +47,9 @@ function Landing() {
 		}
 
 		return () => {
-			socket?.removeAllListeners();
+			socket?.off('unauthenticated')?.off('authenticated')?.off('disconnect');
 		};
-	}, [dispatch, socket]);
+	}, [dispatch, password, playerName, socket]);
 
 	async function login() {
 		setIncorrectPassword(false);

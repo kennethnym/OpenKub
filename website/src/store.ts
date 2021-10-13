@@ -1,9 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
 
-import Player, { PlayerStore } from './common/api/player';
-import GameRoom, { GameRoomStore } from './common/api/game-room';
-import AppStore, { AppState } from './app/store';
+import type Player from './common/api/player';
+import type GameRoom from './common/api/game-room';
+import type { AppState } from './app/store';
+import { PlayerStore } from './common/api/player';
+import { GameRoomStore } from './common/api/game-room';
+import AppStore from './app/store';
 
 /**
  * Describes the shape of the application-wide store

@@ -35,3 +35,7 @@ const InGameRoomID = "in_game_room_id"
 
 // SocketServer points to an instance of socket.io server
 const SocketServer = "socket_server"
+
+// OnlinePlayers points to the set of IDs of currently online players
+// stored in context.
+const OnlinePlayers = "online_players"

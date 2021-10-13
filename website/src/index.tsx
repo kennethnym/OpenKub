@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import { enableMapSet } from 'immer';
 
 import 'react-toastify/dist/ReactToastify.css';
-import 'tippy.js/dist/tippy.css';
 
 import * as serviceWorker from './serviceWorker';
 import './index.out.css';

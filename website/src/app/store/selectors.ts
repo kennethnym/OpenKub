@@ -1,8 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit';
 
-import { RootStore } from '../../store';
-import { Page } from '../pages';
-import { AppState } from './type';
+import type { RootStore } from '../../store';
+import type { Page } from '../pages';
+import type { AppState } from './type';
 
 const selectActivePage = createSelector<RootStore, AppState, Page>(
 	(state) => state.app,

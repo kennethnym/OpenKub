@@ -2,15 +2,14 @@ package auth
 
 import (
 	"fmt"
+	"github.com/kennethnym/OpenKub/internal/service"
+	"github.com/kennethnym/OpenKub/internal/socket"
 	"strconv"
 
-	"github.com/go-pg/pg/v10"
-	"github.com/go-redis/redis/v8"
 	socketio "github.com/googollee/go-socket.io"
 	"github.com/kennethnym/OpenKub/internal/ctxval"
 	"github.com/kennethnym/OpenKub/internal/errcode"
 	"github.com/kennethnym/OpenKub/internal/player"
-	"github.com/kennethnym/OpenKub/internal/service"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,8 +17,8 @@ import (
 func AuthenticateSocket(c socketio.Conn, username string, password string) {
 	fmt.Printf("authentication requested for %v\n", username)
 
-	ctx := c.Context().(map[string]interface{})
-	db := ctx[ctxval.DbClient].(*pg.DB)
+	ctx := c.Context().(ctxval.SocketContext)
+	db := service.GetDbClient(ctx)
 
 	playerObj := player.Player{}
 	playerModel := db.Model(&playerObj)
@@ -64,7 +63,7 @@ func AuthenticateSocket(c socketio.Conn, username string, password string) {
 		return
 	}
 
-	fmt.Printf("successful authentication\n")
+	fmt.Println("successful authentication")
 
 	ctx[ctxval.Player] = playerObj
 
@@ -77,9 +76,7 @@ func AuthenticateSocket(c socketio.Conn, username string, password string) {
 		return
 	}
 
-	redisClient := ctx[ctxval.RedisClient].(*redis.Client)
-
-	err = redisClient.SAdd(service.RedisCtx, service.RedisKeyOnlinePlayer, playerObj.ID).Err()
+	player.AddOnlinePlayer(ctx, playerObj)
 
 	if err != nil {
 		c.Emit("exception", map[string]string{
@@ -91,7 +88,7 @@ func AuthenticateSocket(c socketio.Conn, username string, password string) {
 
 	// remove this socket from the set of unauthenticated connections
 	// to prevent it from being automatically disconnected
-	delete(ctx[ctxval.UnauthenticatedConns].(map[string]UnauthenticatedConn), c.ID())
+	delete(ctx[ctxval.UnauthenticatedConns].(map[string]socket.UnauthenticatedConn), c.ID())
 	(ctx[ctxval.ActiveConns].(map[int]socketio.Conn))[playerObj.ID] = c
 
 	server := ctx[ctxval.SocketServer].(*socketio.Server)

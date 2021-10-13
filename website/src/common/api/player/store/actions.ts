@@ -1,6 +1,6 @@
 import { createAction } from '@reduxjs/toolkit';
 
-import Player from '../player';
+import type Player from '../player';
 
 const setPlayer = createAction<Player>('SET_PLAYER');
 

@@ -1,8 +1,9 @@
 import React from 'react';
 
+import type { Page } from './pages';
+import { PAGES } from './pages';
 import AppStore from './store';
 import { useRootSelector } from '../store';
-import { Page, PAGES } from './pages';
 
 /**
  * Renders the current page

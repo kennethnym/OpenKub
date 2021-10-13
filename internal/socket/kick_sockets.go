@@ -3,13 +3,11 @@ package socket
 import (
 	"fmt"
 	"time"
-
-	"github.com/kennethnym/OpenKub/internal/auth"
 )
 
 // kickUnauthenticatedSockets kicks unauthenticated socket connections
 // when they haven't authenticated themselves in 5 seconds
-func kickUnauthenticatedSockets(conns map[string]auth.UnauthenticatedConn) {
+func kickUnauthenticatedSockets(conns map[string]UnauthenticatedConn) {
 	fmt.Printf("conns %v\n", conns)
 
 	for id, conn := range conns {

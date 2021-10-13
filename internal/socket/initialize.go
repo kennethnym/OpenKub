@@ -42,7 +42,7 @@ func Initialize(ctx map[string]interface{}) *socketio.Server {
 			p,
 			wb,
 		},
-		PingTimeout: time.Duration(time.Second * 60),
+		PingTimeout: time.Second * 60,
 	})
 
 	if err != nil {
@@ -59,11 +59,13 @@ func Initialize(ctx map[string]interface{}) *socketio.Server {
 // defineEvents defines socket events that the server will handle
 func defineEvents(server *socketio.Server, ctx map[string]interface{}) {
 	// a map of session id to its corresponding socket connection
-	unauthenticatedConns := map[string]auth.UnauthenticatedConn{}
+	unauthenticatedConns := map[string]UnauthenticatedConn{}
 	// a map of user id to their active socket connection
 	activeConns := map[int]socketio.Conn{}
 	// a map of user id to the game room they are hosting
 	activeGames := map[string]*game.Room{}
+	// a set of IDs of currently online players
+	onlinePlayers := map[string]bool{}
 
 	kickTicker := time.NewTicker(time.Second * 5)
 
@@ -79,6 +81,7 @@ func defineEvents(server *socketio.Server, ctx map[string]interface{}) {
 			ctxval.SocketServer:         server,
 			ctxval.ActiveGames:          activeGames,
 			ctxval.InGameRoomID:         "",
+			ctxval.OnlinePlayers:        onlinePlayers,
 		}
 
 		// copy initial context values to socketCtx
@@ -88,7 +91,7 @@ func defineEvents(server *socketio.Server, ctx map[string]interface{}) {
 
 		c.SetContext(socketCtx)
 
-		unauthenticatedConns[c.ID()] = auth.UnauthenticatedConn{
+		unauthenticatedConns[c.ID()] = UnauthenticatedConn{
 			JoinedOn: time.Now(),
 			Conn:     c,
 		}

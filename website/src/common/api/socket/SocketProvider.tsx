@@ -1,4 +1,5 @@
-import React, { ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
 import io from 'socket.io-client';
 
 import SocketContext from './context';
@@ -13,13 +14,13 @@ function SocketProvider({ children }: SocketProviderProps) {
 
 	function initializeSocket() {
 		console.log('initialize');
-		setSocket(
-			io(SERVER_URL, {
-				path: '/api/socket',
-				transports: ['websocket'],
-				reconnection: false,
-			})
-		);
+		const newSocket = io(SERVER_URL, {
+			path: '/api/socket',
+			transports: ['websocket'],
+			reconnection: false,
+		});
+		setSocket(newSocket);
+		console.log('new socket', newSocket);
 	}
 
 	return (

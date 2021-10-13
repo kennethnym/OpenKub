@@ -30,3 +30,7 @@ func PostgresMiddleware(db *pg.DB) gin.HandlerFunc {
 		ctx.Next()
 	}
 }
+
+func GetDbClient(ctx ctxval.SocketContext) *pg.DB {
+	return ctx[ctxval.DbClient].(*pg.DB)
+}

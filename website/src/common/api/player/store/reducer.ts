@@ -1,7 +1,7 @@
 import { createReducer } from '@reduxjs/toolkit';
 
+import type Player from '../player';
 import { changePlayerOnlineStatus, setPlayer } from './actions';
-import Player from '../player';
 
 const reducer = createReducer<Nullable<Player>>(null, {
 	[setPlayer.type]: (state, action) => action.payload,

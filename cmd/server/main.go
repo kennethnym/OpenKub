@@ -45,7 +45,7 @@ func initServer() {
 
 	defineRoutes(router, socketServer, initialCtx)
 
-	err := router.RunTLS(":8080", "certs/dev.crt", "certs/dev.key")
+	err := router.Run(":8080")
 
 	if err != nil {
 		log.Fatal(err)

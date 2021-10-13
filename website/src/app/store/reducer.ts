@@ -3,12 +3,12 @@ import io from 'socket.io-client';
 
 import { SERVER_URL } from 'src/common/api';
 
-import { AppState } from './type';
+import type { AppState } from './type';
 import { Page } from '../pages';
 import { changePage, initializeSocketIO } from './actions';
 
 const initialState: AppState = {
-	activePage: Page.IN_GAME,
+	activePage: Page.LANDING,
 	socket: null,
 };
 
