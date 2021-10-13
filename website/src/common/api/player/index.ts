@@ -1,5 +1,5 @@
+import type Player from './player';
 import PlayerStore from './store';
-import Player from './player';
 
 export default Player;
 export * from './player';
