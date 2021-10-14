@@ -26,15 +26,15 @@ func AuthenticateSocket(c socketio.Conn, username string, password string) {
 
 	if err != nil {
 		fmt.Printf("err %v\n", err)
-		c.Emit("exception", map[string]string{
-			"event": "authentication",
+		c.Emit(socket.EventException, map[string]string{
+			"event": socket.EventAuthentication,
 			"error": errcode.UnexpectedError,
 		})
 		return
 	}
 
 	if !exists {
-		c.Emit("unauthenticated", map[string]string{
+		c.Emit(socket.EventUnauthenticated, map[string]string{
 			"error": playerNotRegistered,
 		})
 		return
@@ -65,12 +65,12 @@ func AuthenticateSocket(c socketio.Conn, username string, password string) {
 
 	fmt.Println("successful authentication")
 
-	ctx[ctxval.Player] = playerObj
+	player.SetCurrentPlayer(ctx, playerObj)
 
 	if err != nil {
 		fmt.Printf("err %v\n", err)
-		c.Emit("exception", map[string]string{
-			"event": "authentication",
+		c.Emit(socket.EventException, map[string]string{
+			"event": socket.EventAuthentication,
 			"error": errcode.UnexpectedError,
 		})
 		return
@@ -79,21 +79,25 @@ func AuthenticateSocket(c socketio.Conn, username string, password string) {
 	player.AddOnlinePlayer(ctx, playerObj)
 
 	if err != nil {
-		c.Emit("exception", map[string]string{
-			"event": "authentication",
+		c.Emit(socket.EventException, map[string]string{
+			"event": socket.EventAuthentication,
 			"error": errcode.UnexpectedError,
 		})
 		return
 	}
 
-	// remove this socket from the set of unauthenticated connections
-	// to prevent it from being automatically disconnected
-	delete(ctx[ctxval.UnauthenticatedConns].(map[string]socket.UnauthenticatedConn), c.ID())
-	(ctx[ctxval.ActiveConns].(map[int]socketio.Conn))[playerObj.ID] = c
+	stopAuthTimer(ctx, c)
+	socket.AddActiveConnection(ctx, playerObj, c)
 
-	server := ctx[ctxval.SocketServer].(*socketio.Server)
+	server := socket.GetSocketServer(ctx)
 
-	c.Emit("authenticated")
+	c.Emit(socket.EventAuthenticated)
 	server.BroadcastToRoom("/", "all", strconv.Itoa(playerObj.ID)+"_connected")
 	c.Join("all")
+}
+
+// stopAuthTimer removes the given socket from the set of unauthenticated connections
+// to prevent it from being automatically disconnected
+func stopAuthTimer(ctx ctxval.SocketContext, conn socketio.Conn) {
+	delete(ctx[ctxval.UnauthenticatedConns].(map[string]socket.UnauthenticatedConn), conn.ID())
 }

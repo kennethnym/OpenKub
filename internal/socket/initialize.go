@@ -111,3 +111,9 @@ func defineEvents(server *socketio.Server, ctx map[string]interface{}) {
 
 	game.DefineGameEvents(server)
 }
+
+// GetSocketServer returns the instance of socketio.Server stored in the given
+// ctxval.SocketContext.
+func GetSocketServer(ctx ctxval.SocketContext) *socketio.Server {
+	return ctx[ctxval.SocketServer].(*socketio.Server)
+}

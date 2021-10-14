@@ -2,16 +2,12 @@ package socket
 
 import (
 	"fmt"
-	"math/rand"
-	"strconv"
-	"time"
-
-	"github.com/go-redis/redis/v8"
 	socketio "github.com/googollee/go-socket.io"
 	"github.com/kennethnym/OpenKub/internal/ctxval"
 	"github.com/kennethnym/OpenKub/internal/game"
 	"github.com/kennethnym/OpenKub/internal/player"
-	"github.com/kennethnym/OpenKub/internal/service"
+	"math/rand"
+	"strconv"
 )
 
 // handleDisconnection handles socket disconnection event
@@ -21,13 +17,13 @@ func handleDisconnection(c socketio.Conn, reason string) {
 
 	ctx := c.Context().(map[string]interface{})
 
-	if player, ok := ctx[ctxval.Player].(player.Player); ok {
+	if p, ok := ctx[ctxval.Player].(player.Player); ok {
 		server := ctx[ctxval.SocketServer].(*socketio.Server)
-		playerID := player.ID
+		playerID := p.ID
 
 		fmt.Printf("player %v going offline...\n", playerID)
 
-		// check if the current player is in a game
+		// check if the current p is in a game
 		if roomID := ctx[ctxval.InGameRoomID].(string); roomID != "" {
 			activeGames := ctx[ctxval.ActiveGames].(map[string]*game.Room)
 			room := activeGames[roomID]
@@ -42,7 +38,7 @@ func handleDisconnection(c socketio.Conn, reason string) {
 				// delete this room
 				delete(activeGames, roomID)
 			} else if room.HostedBy.ID == playerID {
-				// the player is the host of the game
+				// the p is the host of the game
 				// we need to assign a new host
 				playersCount := len(room.Players)
 				players := make([]int, playersCount)
@@ -59,22 +55,6 @@ func handleDisconnection(c socketio.Conn, reason string) {
 				server.BroadcastToRoom("/", roomID, roomID+":new_host", newHost.ID)
 			}
 		}
-
-		redisClient := ctx[ctxval.RedisClient].(*redis.Client)
-		retryTicker := time.NewTicker(time.Second * 5)
-
-		go func() {
-			for {
-				<-retryTicker.C
-
-				err := redisClient.SRem(service.RedisCtx, service.RedisKeyOnlinePlayer, playerID).Err()
-
-				if err == nil {
-					retryTicker.Stop()
-					break
-				}
-			}
-		}()
 
 		delete(ctx[ctxval.ActiveConns].(map[int]socketio.Conn), playerID)
 
